@@ -1995,6 +1995,31 @@ class SchemaTest {
     }
   }
 
+  @Ignore("Let's fix it yo.")
+  @Test
+  fun resolveOptionsWithRelativePath() {
+    val schema = RepoBuilder()
+        .add("squareup/common/options.proto", """
+             |syntax = "proto2";
+             |package squareup.common;
+             |import "google/protobuf/descriptor.proto";
+             |
+             |extend google.protobuf.FileOptions {
+             |  optional string file_status = 60000;
+             |}
+             """.trimMargin())
+        .add("squareup/domain/message.proto", """
+             |syntax = "proto2";
+             |package squareup.domain;
+             |import "squareup/common/options.proto";
+             |option (common.file_status) = "INTERNAL";
+             |
+             |message Message{}
+             """.trimMargin())
+        .schema()
+    assertThat(schema.protoFile("squareup/domain/message.proto")).isNotNull()
+  }
+
   @Test
   fun resolveOptionsWithRelativePath() {
     val schema = RepoBuilder()
